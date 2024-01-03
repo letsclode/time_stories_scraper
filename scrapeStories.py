@@ -7,12 +7,12 @@ import json
 url = 'https://time.com/'
 
 # HTML parser class
+# HTML parser class
 class MyHTMLParser(HTMLParser):
     def __init__(self):
         super().__init__()
         self.in_item = False
         self.in_headline = False
-        self.in_timestamp = False
         self.latest_stories = []
 
     def handle_starttag(self, tag, attrs):
@@ -20,24 +20,20 @@ class MyHTMLParser(HTMLParser):
             self.in_item = True
         elif self.in_item and tag == 'h3' and ('class', 'latest-stories__item-headline') in attrs:
             self.in_headline = True
-        elif self.in_item and tag == 'time' and ('class', 'latest-stories__item-timestamp') in attrs:
-            self.in_timestamp = True
+        elif self.in_item and tag == 'a':
+            # Extract the <a> tag
+            self.current_story = {'link': attrs[0][1]}
 
     def handle_endtag(self, tag):
         if tag == 'li':
             self.in_item = False
         elif self.in_headline and tag == 'h3':
             self.in_headline = False
-        elif self.in_timestamp and tag == 'time':
-            self.in_timestamp = False
 
     def handle_data(self, data):
         if self.in_headline:
             title = data.strip()
-            self.current_story = {'title': title}
-        elif self.in_timestamp:
-            timestamp = data.strip()
-            self.current_story['timestamp'] = timestamp
+            self.current_story['title'] = title
             self.latest_stories.append(self.current_story)
 
 # Function to fetch HTML content
